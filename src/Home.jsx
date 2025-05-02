@@ -9,6 +9,7 @@ import Header from './components/Header';
 import { Briefcase, BookmarkCheck, Send, Filter, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion'; 
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 function Home() {
   const [jobs, setJobs] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, pageSize: 20, totalPages: 1 });
@@ -19,6 +20,7 @@ function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
+
 
   const fetchJobs = async (query, page = 1) => {
     setLoading(true);
@@ -34,7 +36,7 @@ function Home() {
         params = {};
       }
 
-      const res = await axios.get(endpoint, { params });
+      const res = await axios.get(`${BASE_URL}${endpoint}`, { params });
       setJobs(res.data.data || res.data);
       if (viewMode === "all") {
         setPagination(res.data.pagination);
