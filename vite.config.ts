@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
-      '/api': 'http://localhost:5000'  // 👈 Proxy /api requests to backend
+      '/api': 'https://jobportal-api-2nhd.onrender.com'  // 👈 Proxy /api requests to backend
     }
   }
 });
