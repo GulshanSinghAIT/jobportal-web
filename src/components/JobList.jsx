@@ -46,7 +46,6 @@ export default function JobList({ jobs = [] }) {
         const data = await res.json();
         setSavedJobs(new Set(data.map((j) => j.jobId)));
       } catch (err) {
-        toast.error("Failed to load saved jobs");
         console.error("Error loading saved jobs", err);
       } finally {
         setIsLoading(false);

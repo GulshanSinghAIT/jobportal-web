@@ -8,9 +8,13 @@ import { Button } from './components/ui/button';
 import Header from './components/Header';
 import { Briefcase, BookmarkCheck, Send, Filter, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion'; 
-
+import { useAuth } from '@clerk/clerk-react';
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 function Home() {
+  
+const { getToken } = useAuth();
+console.log("k",getToken())
   const [jobs, setJobs] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, pageSize: 20, totalPages: 1 });
   const [search, setSearch] = useState('');
@@ -25,18 +29,28 @@ function Home() {
   const fetchJobs = async (query, page = 1) => {
     setLoading(true);
     try {
+      // Start by setting default values for the API request
       let endpoint = '/api/jobs';
       let params = { q: query, page, ...filters };
-
+  
       if (viewMode === "saved") {
         endpoint = '/api/user/saved';
-        params = {};
+        params = {}; // For saved jobs, you don't need query params
       } else if (viewMode === "applied") {
         endpoint = '/api/user/applied';
-        params = {};
+        params = {}; // For applied jobs, you don't need query params
       }
-
-      const res = await axios.get(`${BASE_URL}${endpoint}`, { params });
+  
+      // Get the Clerk authentication token (for the authenticated user)
+      const token = await getToken();
+  
+      const res = await axios.get(`${BASE_URL}${endpoint}`, {
+        params,
+        headers: {
+          Authorization: `Bearer ${token}`, // Send the token in the Authorization header
+        },
+      });
+  
       setJobs(res.data.data || res.data);
       if (viewMode === "all") {
         setPagination(res.data.pagination);
@@ -48,7 +62,7 @@ function Home() {
       setInitialLoad(false);
     }
   };
-
+  
   useEffect(() => {
     fetchJobs(search, 1);
   }, [search, filters, viewMode]);
