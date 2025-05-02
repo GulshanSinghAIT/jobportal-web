@@ -15,7 +15,7 @@ import {
   Calendar,
   ExternalLink,
 } from "lucide-react";
-
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 // Salary formatting helpers
 const formatSalary = (salary) => {
   const num = parseFloat(salary.replace(/[^\d.]/g, ""));
@@ -42,7 +42,7 @@ export default function JobList({ jobs = [] }) {
     async function loadSaved() {
       try {
         setIsLoading(true);
-        const res = await fetch("/api/user/saved");
+        const res = await fetch(`${BASE_URL}/api/user/saved`);
         const data = await res.json();
         setSavedJobs(new Set(data.map((j) => j.jobId)));
       } catch (err) {
@@ -58,7 +58,7 @@ export default function JobList({ jobs = [] }) {
   const handleSave = async (jobId) => {
     setSavingJobs((prev) => new Set(prev).add(jobId));
     try {
-      await fetch(`/api/jobs/${jobId}/save`, {
+      await fetch(`${BASE_URL}/api/jobs/${jobId}/save`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
@@ -88,7 +88,7 @@ export default function JobList({ jobs = [] }) {
   const handleApply = async (jobId) => {
     setApplyingJobs((prev) => new Set(prev).add(jobId));
     try {
-      await fetch(`/api/jobs/${jobId}/apply`, {
+      await fetch(`${BASE_URL}/api/jobs/${jobId}/apply`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
