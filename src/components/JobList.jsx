@@ -5,6 +5,27 @@ import { Button } from "./ui/button";
 import { Loader2, Heart, MapPin, Building, Clock, Briefcase, Calendar, ExternalLink } from "lucide-react";
 // Remove toast dependency - we'll use alert instead
 
+// Helper functions for salary formatting
+const formatSalary = (salary) => {
+  // Convert to number if it's a string with digits only
+  const num = parseFloat(salary.replace(/[^\d.]/g, ''));
+  if (isNaN(num)) return salary;
+  
+  // Format with commas: 1,00,000
+  return num.toLocaleString('en-IN');
+};
+
+const formatSalaryRange = (salaryRange) => {
+  // Expected format: "50000-70000" or similar
+  const parts = salaryRange.split('-');
+  if (parts.length !== 2) return salaryRange;
+  
+  const min = formatSalary(parts[0].trim());
+  const max = formatSalary(parts[1].trim());
+  
+  return `${min} - ${max}/month`;
+};
+
 export default function JobList({ jobs = [] }) {
   const [savedJobs, setSavedJobs] = useState(new Set());
   const [savingJobs, setSavingJobs] = useState(new Set());
@@ -163,31 +184,60 @@ export default function JobList({ jobs = [] }) {
 
                   {job.salary && (
                     <div className="flex items-center text-sm font-medium">
-                      <span className="truncate">₹ {job.salary}</span>
+                      {job.salary.includes("-") ? (
+                        // If salary contains a range (e.g., "50000-70000")
+                        <div className="flex items-center">
+                          <span className="text-emerald-500 font-semibold">₹</span>
+                          <span className="truncate ml-1">{formatSalaryRange(job.salary)}</span>
+                        </div>
+                      ) : job.salary.toLowerCase().includes("month") || job.salary.toLowerCase().includes("year") ? (
+                        // If salary already includes "per month/year" text
+                        <div className="flex items-center">
+                          <span className="text-emerald-500 font-semibold">₹</span>
+                          <span className="truncate ml-1">{job.salary}</span>
+                        </div>
+                      ) : (
+                        // Default: just show the salary
+                        <div className="flex items-center">
+                          <span className="text-emerald-500 font-semibold">₹</span>
+                          <span className="truncate ml-1">{formatSalary(job.salary)}</span>
+                          <span className="text-xs text-muted-foreground ml-1">/month</span>
+                        </div>
+                      )}
                     </div>
                   )}
                   
                   <div className="flex flex-wrap gap-2 pt-2">
-                    <Badge variant="secondary" className="flex items-center">
-                      <Briefcase className="h-3 w-3 mr-1" />
-                      {job.experience_level}
-                    </Badge>
-                    <Badge variant="secondary" className="flex items-center">
-                      <Clock className="h-3 w-3 mr-1" />
-                      {job.job_type}
-                    </Badge>
-                    <Badge variant="secondary" className="flex items-center">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      {job.work_setting}
-                    </Badge>
+                    {job.experience_level && (
+                      <Badge variant="secondary" className="flex items-center">
+                        <Briefcase className="h-3 w-3 mr-1" />
+                        {job.experience_level}
+                      </Badge>
+                    )}
+                    {job.job_type && (
+                      <Badge variant="secondary" className="flex items-center">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {job.job_type}
+                      </Badge>
+                    )}
+                    {job.work_setting && (
+                      <Badge variant="secondary" className="flex items-center">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        {job.work_setting}
+                      </Badge>
+                    )}
+                    {job.salary_range && !job.salary && (
+                      <Badge variant="secondary" className="flex items-center bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
+                        ₹ {formatSalaryRange(job.salary_range)}
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </CardContent>
               
               <CardFooter className="flex justify-between gap-2 pt-2 pb-4">
-                <a href={job.job_link} target="_blank" rel="noopener noreferrer" className=" w-full cursor-pointer">
                 <Button
-                  className="w-full flex-1" 
+                  className="flex-1"
                   variant="default"
                   size="sm"
                   onClick={() => handleApply(job.id)}
@@ -202,18 +252,15 @@ export default function JobList({ jobs = [] }) {
                     "Apply Now"
                   )}
                 </Button>
-                </a>
-                <a href={job.job_link} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 transition duration-200">
                 
                 <Button 
                   variant="outline" 
                   size="sm"
                   className="flex-none"
-                  
+                  onClick={() => window.open(`/jobs/${job.id}`, '_blank')}
                 >
                   <ExternalLink className="h-4 w-4" />
                 </Button>
-                </a>
               </CardFooter>
             </Card>
           </li>
